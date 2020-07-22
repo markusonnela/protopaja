@@ -135,7 +135,7 @@ export default class App extends Component {
   startScan() {
     if (!this.state.scanning) {
       //this.setState({peripherals: new Map()});
-      BleManager.scan([], 6, true).then((results) => {
+      BleManager.scan([], 5, true).then((results) => {
         console.log('Scanning...');
         this.setState({scanning: true});
       });
