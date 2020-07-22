@@ -135,7 +135,7 @@ export default class App extends Component {
   startScan() {
     if (!this.state.scanning) {
       //this.setState({peripherals: new Map()});
-      BleManager.scan([], 3, true).then((results) => {
+      BleManager.scan([], 6, true).then((results) => {
         console.log('Scanning...');
         this.setState({scanning: true});
       });
@@ -187,49 +187,33 @@ export default class App extends Component {
             setTimeout(() => {
               /* Test read current RSSI value
             BleManager.retrieveServices(peripheral.id).then((peripheralData) => {
-              console.log('Retrieved peripheral services', peripheralData);
+              console.log('Retrieved peripheral services ', peripheralData);
               BleManager.readRSSI(peripheral.id).then((rssi) => {
                 console.log('Retrieved actual RSSI value', rssi);
               });
             });*/
 
-              // Test using bleno's pizza example
-              // https://github.com/sandeepmistry/bleno/tree/master/examples/pizza
               BleManager.retrieveServices(peripheral.id).then(
                 (peripheralInfo) => {
                   console.log(peripheralInfo);
-                  var service = '13333333-3333-3333-3333-333333333337';
-                  var bakeCharacteristic =
-                    '13333333-3333-3333-3333-333333330003';
-                  var crustCharacteristic =
-                    '13333333-3333-3333-3333-333333330001';
+                  var serviceUUID = 'b4a31aa5-7163-4dcb-8639-92b898970df2';
+                  var temperatureUUID = '2A3C';
 
                   setTimeout(() => {
                     BleManager.startNotification(
                       peripheral.id,
-                      service,
-                      bakeCharacteristic,
+                      serviceUUID,
+                      temperatureUUID,
                     )
                       .then(() => {
                         console.log('Started notification on ' + peripheral.id);
                         setTimeout(() => {
-                          BleManager.write(
+                          BleManager.read(
                             peripheral.id,
-                            service,
-                            crustCharacteristic,
-                            [0],
+                            serviceUUID,
+                            temperatureUUID,
                           ).then(() => {
-                            console.log('Writed NORMAL crust');
-                            BleManager.write(
-                              peripheral.id,
-                              service,
-                              bakeCharacteristic,
-                              [1, 95],
-                            ).then(() => {
-                              console.log(
-                                'Writed 351 temperature, the pizza should be BAKED',
-                              );
-                            });
+                            console.log('Reading temperature data');
                           });
                         }, 500);
                       })
