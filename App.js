@@ -184,6 +184,15 @@ export default class App extends Component {
             }
             console.log('Connected to ' + peripheral.id);
 
+            BleManager.retrieveServices(peripheral.id).then(
+              (peripheralInfo) => {
+                console.log(
+                  'Peripheral info:',
+                  peripheralInfo.advertising.serviceUUIDs[0],
+                );
+              },
+            );
+
             setTimeout(() => {
               /* Test read current RSSI value
             BleManager.retrieveServices(peripheral.id).then((peripheralData) => {
@@ -196,7 +205,7 @@ export default class App extends Component {
               BleManager.retrieveServices(peripheral.id).then(
                 (peripheralInfo) => {
                   console.log(peripheralInfo);
-                  var serviceUUID = 'b4a31aa5-7163-4dcb-8639-92b898970df2';
+                  var serviceUUID = peripheralInfo.advertising.serviceUUIDs[0];
                   var temperatureUUID = '2A3C';
 
                   setTimeout(() => {
