@@ -21,6 +21,7 @@ const window = Dimensions.get('window');
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+var Buffer = require('buffer/').Buffer;
 
 export default class App extends Component {
   constructor() {
@@ -204,32 +205,61 @@ export default class App extends Component {
 
               BleManager.retrieveServices(peripheral.id).then(
                 (peripheralInfo) => {
-                  console.log(peripheralInfo);
                   var serviceUUID = peripheralInfo.advertising.serviceUUIDs[0];
-                  var temperatureUUID = '2A3C';
+
+                  peripheralInfo.characteristics.forEach((i) => {
+                    if (i.service == serviceUUID) {
+                      console.log(i);
+                    }
+                  });
+                  var tempUUID = '2A3C';
+                  var pressUUID = '2A6D';
 
                   setTimeout(() => {
+                    /*BleManager.read(peripheral.id, serviceUUID, tempUUID)
+                      .then((readData) => {
+                        // Success code
+
+                        const buffer = Buffer.from(readData);
+
+                        const sensorData = buffer.readFloatLE(0, true);
+
+                        console.log('Temperature: ' + sensorData);
+                      })
+                      .catch((error) => {
+                        // Failure code
+                        console.log('Found this error --> ' + error);
+                      });*/
+
                     BleManager.startNotification(
                       peripheral.id,
                       serviceUUID,
-                      temperatureUUID,
+                      tempUUID,
                     )
                       .then(() => {
                         console.log('Started notification on ' + peripheral.id);
-                        setTimeout(() => {
-                          BleManager.read(
-                            peripheral.id,
-                            serviceUUID,
-                            temperatureUUID,
-                          ).then(() => {
-                            console.log('Reading temperature data');
-                          });
-                        }, 500);
                       })
                       .catch((error) => {
                         console.log('Notification error', error);
                       });
                   }, 200);
+
+                  setTimeout(() => {
+                    BleManager.read(peripheral.id, serviceUUID, pressUUID)
+                      .then((readData) => {
+                        // Success code
+
+                        const buffer = Buffer.from(readData);
+
+                        const sensorData = buffer.readFloatLE(0, true);
+
+                        console.log('Pressure: ' + sensorData);
+                      })
+                      .catch((error) => {
+                        // Failure code
+                        console.log('Found this error --> ' + error);
+                      });
+                  }, 500);
                 },
               );
             }, 900);
