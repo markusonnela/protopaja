@@ -1,0 +1,56 @@
+{
+    "advertising": {
+        "isConnectable": true,
+        "localName": "BEST SENSOR EVERRRRR",
+        "manufacturerData": {
+            "CDVType": "ArrayBuffer",
+            "bytes": [Array],
+            "data": "AgEGEQbyDZeYuJI5hstNY3GlGqO0FQlCRVNUIFNFTlNPUiBFVkVSUlJSUgAAAAAAAAAAAAAAAAAAAAAAAAA="
+        },
+        "serviceData": {},
+        "serviceUUIDs": ["b4a31aa5-7163-4dcb-8639-92b898970df2"],
+        "txPowerLevel": -2147483648
+    },
+    "characteristics": [
+        { "characteristic": "2a00", "properties": [Object], "service": "1800" },
+        { "characteristic": "2a01", "properties": [Object], "service": "1800" },
+        {
+            "characteristic": "2a05",
+            "descriptors": [Array],
+            "properties": [Object],
+            "service": "1801"
+        },
+        {
+            "characteristic": "2a3c",
+            "descriptors": [Array],
+            "properties": [Object],
+            "service": "b4a31aa5-7163-4dcb-8639-92b898970df2"
+        },
+        {
+            "characteristic": "2a6d",
+            "descriptors": [Array],
+            "properties": [Object],
+            "service": "b4a31aa5-7163-4dcb-8639-92b898970df2"
+        },
+        {
+            "characteristic": "2ab3",
+            "descriptors": [Array],
+            "properties": [Object],
+            "service": "b4a31aa5-7163-4dcb-8639-92b898970df2"
+        },
+        {
+            "characteristic": "2a6f",
+            "descriptors": [Array],
+            "properties": [Object],
+            "service": "b4a31aa5-7163-4dcb-8639-92b898970df2"
+        }
+    ],
+    "id": "F8:C2:53:88:95:A7",
+    "name": "BEST SENSOR EVERRRRR",
+    "rssi": -65,
+    "services": [
+        { "uuid": "1800" },
+        { "uuid": "1801" },
+        { "uuid": "b4a31aa5-7163-4dcb-8639-92b898970df2" }
+    ]
+}

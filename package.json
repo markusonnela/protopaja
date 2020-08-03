@@ -1,32 +1,34 @@
 {
-  "name": "testProject",
-  "version": "0.0.1",
-  "private": true,
+  "name": "protocamp",
+  "version": "1.0.0",
+  "description": "Bluetooth sensor visualizer for Protocamp",
+  "main": "index.js",
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "start": "react-native start",
-    "test": "jest",
-    "lint": "eslint ."
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabCas28/Protocamp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GabCas28/Protocamp/issues"
+  },
+  "homepage": "https://github.com/GabCas28/Protocamp#readme",
   "dependencies": {
+    "@react-native-community/cli": "^4.10.1",
     "buffer": "^5.6.0",
-    "react": "16.11.0",
-    "react-native": "0.62.2",
+    "convert-string": "^0.1.0",
+    "core-js": "^3.6.5",
+    "d3": "^5.16.0",
+    "react": "^16.13.1",
+    "react-faux-dom": "^4.5.0",
+    "react-native": "^0.63.2",
     "react-native-ble-manager": "^7.3.1",
-    "react-native-react-library": "file:../react-native-react-library"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.10.4",
-    "@babel/runtime": "^7.10.4",
-    "@react-native-community/eslint-config": "^2.0.0",
-    "babel-jest": "^26.1.0",
-    "eslint": "^7.3.1",
-    "jest": "^26.1.0",
-    "metro-react-native-babel-preset": "^0.60.0",
-    "react-test-renderer": "16.11.0"
-  },
-  "jest": {
-    "preset": "react-native"
+    "react-native-eject": "^0.1.2",
+    "react-native-svg": "^12.1.0",
+    "react-native-timezone": "^1.0.3",
+    "react-native-vector-icons": "^7.0.0"
   }
 }
