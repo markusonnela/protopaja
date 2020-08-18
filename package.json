@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Bluetooth sensor visualizer for Protocamp",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,8 +28,19 @@
     "react-native": "^0.63.2",
     "react-native-ble-manager": "^7.3.1",
     "react-native-eject": "^0.1.2",
+    "react-native-mssql": "^0.1.3",
     "react-native-svg": "^12.1.0",
     "react-native-timezone": "^1.0.3",
     "react-native-vector-icons": "^7.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/runtime": "^7.10.4",
+    "@react-native-community/eslint-config": "^2.0.0",
+    "babel-jest": "^26.1.0",
+    "eslint": "^7.3.1",
+    "jest": "^26.1.0",
+    "metro-react-native-babel-preset": "^0.60.0",
+    "react-test-renderer": "16.11.0"
   }
 }
