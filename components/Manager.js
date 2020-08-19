@@ -40,6 +40,7 @@ export default class Manager extends Component {
       modalOpenBLE: false,
       modalOpenDATA: false,
       modalOpenGRAPH: false,
+      modalOpenSQL: false,
       width: Dimensions.get('window').width,
       height: Dimensions.get('window').height,
     };
@@ -201,6 +202,7 @@ export default class Manager extends Component {
       });
     }
   };
+  //Open modals
   openModalBLE = () => {
     console.log('Openned ble');
     this.setState({
@@ -219,6 +221,13 @@ export default class Manager extends Component {
       modalOpenGRAPH: true,
     });
   };
+  openModalSQL = () => {
+    console.log('Openned sql');
+    this.setState({
+      modalOpenSQL: true,
+    });
+  };
+  //Close modals
   closeModalBLE = () => {
     console.log('Closed ble');
     this.setState({
@@ -235,6 +244,12 @@ export default class Manager extends Component {
     console.log('Closed graph');
     this.setState({
       modalOpenGRAPH: false,
+    });
+  };
+  closeModalSQL = () => {
+    console.log('Closed sql');
+    this.setState({
+      modalOpenSQL: false,
     });
   };
   retrieveConnected = () => {
@@ -309,18 +324,20 @@ export default class Manager extends Component {
 
   renderItemConnected(item) {
     if (item.connected) {
-      const color = 'green';
+      const color = '#3164b5';
       let device = new Device(item);
       return (
         <TouchableHighlight onPress={() => this.openModalDATA()}>
           <View style={[styles.row, {backgroundColor: color}]}>
-            <Text style={styles.titleText}>{item.name}</Text>
-            <Text style={styles.paragraph}>Tap to view data and options</Text>
+            <Text style={styles.connectedText}>{item.name}</Text>
+            <Text style={styles.connectedText}>
+              Tap to view data and options
+            </Text>
             <Text
               style={{
                 fontSize: 8,
                 textAlign: 'center',
-                color: '#333333',
+                color: 'white',
                 padding: 2,
                 paddingBottom: 20,
               }}>
@@ -334,8 +351,9 @@ export default class Manager extends Component {
 
   render = () => {
     const list = Array.from(this.state.peripherals.values());
-    const btnScanTitle =
-      'Scan Bluetooth (' + (this.state.scanning ? 'on' : 'off') + ')';
+    const btnScanTitle = this.state.scanning
+      ? 'Scanning (wait)'
+      : 'Start BLE scan';
     const data = this.state.data.get('D1:6E:E7:3C:B7:C4')
       ? this.state.data.get('D1:6E:E7:3C:B7:C4')
       : new Map();
@@ -358,12 +376,20 @@ export default class Manager extends Component {
           />
         </View>
         <View style={styles.content}>
+          <View style={styles.buttonContainer}>
+            <Button
+              title="SQL controls"
+              color="#3b5998"
+              onPress={() => this.openModalSQL()}
+            />
+          </View>
           <FlatList
             style={styles.list}
             data={list}
             renderItem={({item}) => this.renderItemConnected(item)}
             keyExtractor={(item) => item.id}
           />
+
           <Modal visible={this.state.modalOpenBLE}>
             <View
               style={{
@@ -401,6 +427,25 @@ export default class Manager extends Component {
             </View>
           </Modal>
 
+          <Modal visible={this.state.modalOpenSQL}>
+            <View
+              style={{
+                ...styles.container,
+                ...styles.modalContent,
+                width: windowWidth(),
+                height: windowHeight(),
+              }}>
+              <Icon
+                name="close"
+                style={styles.modalClose}
+                size={30}
+                onPress={() => this.closeModalSQL()}
+              />
+              {
+                //SQL modal content
+              }
+            </View>
+          </Modal>
           <Modal visible={this.state.modalOpenDATA}>
             <View
               style={{
@@ -415,6 +460,9 @@ export default class Manager extends Component {
                 size={30}
                 onPress={() => this.closeModalDATA()}
               />
+              {
+                //DATA modal content
+              }
             </View>
           </Modal>
 
@@ -499,6 +547,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     padding: 10,
+  },
+  connectedText: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: 'white',
+    padding: 5,
   },
   paragraph: {fontSize: 10, textAlign: 'center', color: '#333333', padding: 2},
   modalContent: {
