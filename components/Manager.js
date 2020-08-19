@@ -20,12 +20,12 @@ import BleManager from 'react-native-ble-manager';
 import Device from './Device';
 import TimeZone from 'react-native-timezone';
 import LineChart from './LineChart';
-import SqlManager from './mssql';
+import SqlManager from './SqlManager';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Header} from 'react-native/Libraries/NewAppScreen';
 var Buffer = require('buffer').Buffer;
 const window = Dimensions.get('window');
-
+const DatabaseManager = new SqlManager();
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 export default class Manager extends Component {
@@ -37,6 +37,8 @@ export default class Manager extends Component {
       peripherals: new Map(),
       appState: '',
       data: new Map(),
+      openPeriferal: '',
+      connectedSQL: false,
       modalOpenBLE: false,
       modalOpenDATA: false,
       modalOpenGRAPH: false,
@@ -45,8 +47,6 @@ export default class Manager extends Component {
       height: Dimensions.get('window').height,
     };
   }
-
-  test = () => {};
 
   componentDidMount = () => {
     AppState.addEventListener('change', this.handleAppStateChange);
@@ -142,6 +142,16 @@ export default class Manager extends Component {
     });
   };
 
+  handleConnectionUpdate = async () => {
+    if (!this.state.connectedSQL) {
+      let x = DatabaseManager.connectSql();
+      this.setState({connectedSQL: x});
+    } else {
+      let x = DatabaseManager.disconnectSql();
+      this.setState({connectedSQL: x});
+    }
+  };
+
   handleUpdateValueForCharacteristic = ({
     value,
     peripheral,
@@ -209,16 +219,18 @@ export default class Manager extends Component {
       modalOpenBLE: true,
     });
   };
-  openModalDATA = () => {
+  openModalDATA = (device) => {
     console.log('Openned data');
     this.setState({
       modalOpenDATA: true,
+      openPeriferal: device,
     });
   };
   openModalGRAPH = () => {
     console.log('Openned graph');
     this.setState({
       modalOpenGRAPH: true,
+      modalOpenDATA: false,
     });
   };
   openModalSQL = () => {
@@ -252,6 +264,7 @@ export default class Manager extends Component {
       modalOpenSQL: false,
     });
   };
+
   retrieveConnected = () => {
     BleManager.getConnectedPeripherals([]).then((results) => {
       if (results.length == 0) {
@@ -322,17 +335,22 @@ export default class Manager extends Component {
     );
   }
 
+  renderData(item) {
+    return (
+      <View style={[styles.row, {backgroundColor: '#fff'}]}>
+        <Text style={styles.titleText}>{item.value}</Text>
+      </View>
+    );
+  }
+
   renderItemConnected(item) {
     if (item.connected) {
       const color = '#3164b5';
-      let device = new Device(item);
       return (
-        <TouchableHighlight onPress={() => this.openModalDATA()}>
+        <TouchableHighlight onPress={() => this.openModalDATA(item.id)}>
           <View style={[styles.row, {backgroundColor: color}]}>
             <Text style={styles.connectedText}>{item.name}</Text>
-            <Text style={styles.connectedText}>
-              Tap to view data and options
-            </Text>
+            <Text style={styles.connectedText}>View data and options</Text>
             <Text
               style={{
                 fontSize: 8,
@@ -354,8 +372,8 @@ export default class Manager extends Component {
     const btnScanTitle = this.state.scanning
       ? 'Scanning (wait)'
       : 'Start BLE scan';
-    const data = this.state.data.get('D1:6E:E7:3C:B7:C4')
-      ? this.state.data.get('D1:6E:E7:3C:B7:C4')
+    const data = this.state.data.get(this.state.openPeriferal)
+      ? this.state.data.get(this.state.openPeriferal)
       : new Map();
     const windowWidth = () => this.state.width;
     const windowHeight = () => this.state.height;
@@ -364,7 +382,7 @@ export default class Manager extends Component {
     return (
       <SafeAreaView style={{width: windowWidth(), height: windowHeight()}}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>ProtoCamp THT</Text>
+          <Text style={styles.headerText}>BLE Client - Protopaja</Text>
           <Icon
             name="bluetooth"
             style={styles.icon}
@@ -441,9 +459,23 @@ export default class Manager extends Component {
                 size={30}
                 onPress={() => this.closeModalSQL()}
               />
-              {
-                //SQL modal content
-              }
+              <View style={styles.buttonContainer}>
+                <Button
+                  title={
+                    this.state.connectedSQL
+                      ? 'Connected to database'
+                      : 'Disconnected from database'
+                  }
+                  color="grey"
+                />
+              </View>
+              <View style={styles.buttonContainer}>
+                <Button
+                  title={this.state.connectedSQL ? 'Disconnect' : 'Connect'}
+                  color="#3b5998"
+                  onPress={() => this.handleConnectionUpdate()}
+                />
+              </View>
             </View>
           </Modal>
           <Modal visible={this.state.modalOpenDATA}>
@@ -460,9 +492,19 @@ export default class Manager extends Component {
                 size={30}
                 onPress={() => this.closeModalDATA()}
               />
-              {
-                //DATA modal content
-              }
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Open graph"
+                  color="#3b5998"
+                  onPress={() => this.openModalGRAPH()}
+                />
+              </View>
+              <FlatList
+                style={styles.list}
+                data={data.get(this.state.openPeriferal)}
+                renderItem={({item}) => this.renderData(item)}
+                keyExtractor={(item) => item.id}
+              />
             </View>
           </Modal>
 
