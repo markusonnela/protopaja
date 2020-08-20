@@ -15,6 +15,8 @@ import {
   Button,
   SafeAreaView,
   Modal,
+  Alert,
+  TextInput,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import Device from './Device';
@@ -37,12 +39,14 @@ export default class Manager extends Component {
       peripherals: new Map(),
       appState: '',
       data: new Map(),
+      dataUnit: new Map(),
       openPeriferal: '',
       connectedSQL: false,
       modalOpenBLE: false,
       modalOpenDATA: false,
       modalOpenGRAPH: false,
       modalOpenSQL: false,
+      adminPassword: '',
       width: Dimensions.get('window').width,
       height: Dimensions.get('window').height,
     };
@@ -126,7 +130,9 @@ export default class Manager extends Component {
   handleDisconnectedPeripheral = (data) => {
     let peripherals = this.state.peripherals;
     let peripheral = peripherals.get(data.peripheral);
+
     if (peripheral) {
+      console.log('Testing connected value: ' + peripheral.connected);
       peripheral.connected = false;
       peripherals.set(peripheral.id, peripheral);
       this.setState({peripherals});
@@ -142,14 +148,8 @@ export default class Manager extends Component {
     });
   };
 
-  handleConnectionUpdate = async () => {
-    if (!this.state.connectedSQL) {
-      let x = DatabaseManager.connectSql();
-      this.setState({connectedSQL: x});
-    } else {
-      let x = DatabaseManager.disconnectSql();
-      this.setState({connectedSQL: x});
-    }
+  handleConnectionUpdate = () => {
+    DatabaseManager.connectSql();
   };
 
   handleUpdateValueForCharacteristic = ({
@@ -171,6 +171,10 @@ export default class Manager extends Component {
       ? this.state.data.get(peripheral)
       : new Map();
 
+    let thisDataUnit = this.state.dataUnit.get(peripheral)
+      ? this.state.dataUnit.get(peripheral)
+      : new Map();
+
     let prevValue = thisData.get(characteristic)
       ? thisData.get(characteristic)
       : [];
@@ -188,13 +192,23 @@ export default class Manager extends Component {
         }),
       },
     ]);
-    if (this.state.data[characteristic] != null) {
-      console.log('Duplicate found');
-    }
+
+    thisDataUnit.delete(characteristic);
+    thisDataUnit.set(characteristic, {
+      value: sensorData,
+      time: new Date().getTime(),
+      timeString: new Date().toLocaleString('en-GB', {
+        timeZone: TimeZone.getTimeZone(),
+      }),
+      label: new Date().toLocaleString('en-GB', {
+        timeZone: TimeZone.getTimeZone(),
+      }),
+    });
 
     let mappedData = this.state.data.set(peripheral, thisData);
+    let mappedDataUnit = this.state.dataUnit.set(peripheral, thisDataUnit);
 
-    this.setState({data: mappedData});
+    this.setState({data: mappedData, dataUnit: mappedDataUnit});
   };
 
   handleStopScan = () => {
@@ -204,6 +218,28 @@ export default class Manager extends Component {
 
   startScan = () => {
     console.log('STARTING SCAN');
+    let peripherals = this.state.peripherals;
+
+    let connectedPerifs = new Map();
+
+    peripherals.forEach((perif) => {
+      let peripheral = peripherals.get(perif.id);
+      if (peripheral) {
+        console.log(
+          'Logged stuff: \n ' +
+            peripheral.id +
+            '\nConnected: ' +
+            (peripheral.connected ? true : false),
+        );
+        if (peripheral.connected ? true : false) {
+          connectedPerifs.set(peripheral.id, peripheral);
+        }
+      }
+      //this.checkConnection(perif);
+    });
+
+    this.setState({peripherals: connectedPerifs});
+
     if (!this.state.scanning) {
       //this.setState({peripherals:  new Map()});
       BleManager.scan([], 5, false).then((results) => {
@@ -337,8 +373,13 @@ export default class Manager extends Component {
 
   renderData(item) {
     return (
-      <View style={[styles.row, {backgroundColor: '#fff'}]}>
-        <Text style={styles.titleText}>{item.value}</Text>
+      <View style={(styles.row, {backgroundColor: '#adadad', padding: 10})}>
+        <Text>Charachteristic:</Text>
+        <Text>{item}</Text>
+        <Text>Value:</Text>
+        <Text>
+          {this.state.dataUnit.get(this.state.openPeriferal).get(item).value}
+        </Text>
       </View>
     );
   }
@@ -375,6 +416,11 @@ export default class Manager extends Component {
     const data = this.state.data.get(this.state.openPeriferal)
       ? this.state.data.get(this.state.openPeriferal)
       : new Map();
+    const dataUnit = this.state.dataUnit.get(this.state.openPeriferal)
+      ? Array.from(
+          this.state.dataUnit.get(this.state.openPeriferal).keys(),
+        ).sort()
+      : [];
     const windowWidth = () => this.state.width;
     const windowHeight = () => this.state.height;
     // const listData = Array.from(this.state.data.values());
@@ -460,20 +506,41 @@ export default class Manager extends Component {
                 onPress={() => this.closeModalSQL()}
               />
               <View style={styles.buttonContainer}>
-                <Button
-                  title={
-                    this.state.connectedSQL
-                      ? 'Connected to database'
-                      : 'Disconnected from database'
-                  }
-                  color="grey"
-                />
+                <Button title="Test database connection" color="grey" />
               </View>
               <View style={styles.buttonContainer}>
                 <Button
                   title={this.state.connectedSQL ? 'Disconnect' : 'Connect'}
                   color="#3b5998"
                   onPress={() => this.handleConnectionUpdate()}
+                />
+              </View>
+
+              <TextInput
+                style={styles.forminput}
+                returnKeyType="go"
+                autoCapitalize="none"
+                placeholder="Admin Password"
+                maxLength={20}
+                onChangeText={(adminPassword) => {
+                  this.setState({adminPassword: adminPassword});
+                  console.log(this.state.adminPassword);
+                }}
+                onSubmitEditing={(adminPassword) => {
+                  this.setState({adminPassword: adminPassword});
+                  console.log(this.state.adminPassword);
+                }}
+                value={this.state.adminPassword}
+                placeholderTextColor="rgba(225,225,225,0.7)"
+              />
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Submit changes"
+                  color="#3b5998"
+                  onPress={() => {
+                    console.log('->' + this.state.adminPassword + '<-');
+                    DatabaseManager.updateState(this.state.adminPassword);
+                  }}
                 />
               </View>
             </View>
@@ -494,16 +561,29 @@ export default class Manager extends Component {
               />
               <View style={styles.buttonContainer}>
                 <Button
+                  title={'Device: ' + this.state.openPeriferal}
+                  color="#adadad"
+                />
+              </View>
+              <View style={styles.buttonContainer}>
+                <Button
                   title="Open graph"
                   color="#3b5998"
                   onPress={() => this.openModalGRAPH()}
                 />
               </View>
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Send data"
+                  color="#3b5998"
+                  onPress={() => DatabaseManager.updateDatabase()}
+                />
+              </View>
               <FlatList
                 style={styles.list}
-                data={data.get(this.state.openPeriferal)}
+                data={dataUnit}
                 renderItem={({item}) => this.renderData(item)}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item}
               />
             </View>
           </Modal>
@@ -605,5 +685,14 @@ const styles = StyleSheet.create({
   modalClose: {
     margin: 10,
     textAlign: 'right',
+  },
+  forminput: {
+    fontSize: 20,
+    height: 40,
+    backgroundColor: 'gray',
+    marginBottom: 10,
+    marginHorizontal: 10,
+    padding: 10,
+    color: '#fff',
   },
 });
