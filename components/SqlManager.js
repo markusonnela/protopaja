@@ -7,10 +7,10 @@ export default class SqlManager extends Component {
   constructor() {
     super();
     this.state = {
-      server: '82.130.38.95', //ip address of the mssql database
-      username: 'sa', //username to login to the database
-      password: 'admintest', //password to login to the database
-      database: 'Proto', //the name of the database to connect to
+      server: '', //ip address of the mssql database
+      username: '', //username to login to the database
+      password: '', //password to login to the database
+      database: '', //the name of the database to connect to
       port: 1433, //OPTIONAL, port of the database on the server
       timeout: 5, //OPTIONAL, login timeout for the server
     };
