@@ -1,4 +1,4 @@
-# Protocamp
+# Bluetooth Sensor Visualizer Android App
 Code of summer camp's prototype
 
 The objective of this project is to be able to connect to peripheral ble devices and collect data from them into a smartphone.
